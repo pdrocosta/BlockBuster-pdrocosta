@@ -212,11 +212,8 @@ class MovieViewsT2Test(APITestCase):
         self.assertTrue(Movie.objects.exists(), msg)
 
     def test_movie_deletion_without_token(self):
-        movie_data = {
-            "title": "Frozen",
-            "duration": "102min",
-        }
-        response = self.client.delete(self.BASE_URL, data=movie_data, format="json")
+
+        response = self.client.delete(self.BASE_DETAIL_URL)
 
         # STATUS CODE
         expected_status_code = status.HTTP_401_UNAUTHORIZED
@@ -224,6 +221,6 @@ class MovieViewsT2Test(APITestCase):
 
         msg = (
             "Verifique se o status code retornado do DELETE sem token "
-            + f"em `{self.BASE_URL}` é {expected_status_code}"
+            + f"em `{self.BASE_DETAIL_URL}` é {expected_status_code}"
         )
         self.assertEqual(expected_status_code, resulted_status_code, msg)
