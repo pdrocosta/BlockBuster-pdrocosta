@@ -28,13 +28,13 @@ python -m venv venv
 
 2. Ative seu venv:
 ```bash
-# linux:
+# LINUX:
 source venv/bin/activate
 
-# windows:
+# WINDOWS:
 .\venv\Scripts\activate
 
-# git bash:
+# GIT BASH:
 source venv/Scripts/activate
 ```
 
