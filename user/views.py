@@ -6,9 +6,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-#authentication_classes = [JWTAuthentication]
-#permission_classes=[]
-
+permission_classes=[]
 
 class UserView(APIView):
 
@@ -20,6 +18,8 @@ class UserView(APIView):
 
 
 class LoginView(APIView):
+    authentication_classes = [JWTAuthentication]
+
     def post(self, request: Request) -> Response:
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -27,7 +27,7 @@ class LoginView(APIView):
         user = authenticate(**serializer.validated_data)
 
         if not user:
-            return Response({"detail": "invalid credentials"}, status=400)
+            return Response({"detail": "No active account found with the given credentials"}, status=400)
         refresh = RefreshToken.for_user(user)
         token_dict = {"refresh": str(refresh),
                       "access": str(refresh.access_token)}
