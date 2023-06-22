@@ -1,5 +1,5 @@
 from django.test import TestCase
-from users.models import User
+from user.models import User
 
 
 class UserModelTest(TestCase):
