@@ -1,7 +1,4 @@
 from rest_framework import serializers
-from rest_framework.views import Request, Response, status, APIView
-from rest_framework.validators import UniqueValidator
-from user.models import User
 from movies.models import Movie, MovieOrder
 
 
@@ -22,12 +19,12 @@ class MovieSerializer(serializers.ModelSerializer):
         user = self.context['request'].user
         movie = Movie.objects.create(user=user, **validated_data)
         return movie
-
-
+        
 class MovieOrderSerializer(serializers.ModelSerializer):
     title = serializers.ReadOnlyField(source='movie.title')
     buyed_by = serializers.ReadOnlyField(source='buyed_by.email')
     buyed_at = serializers.ReadOnlyField()
+
 
     class Meta:
         model = MovieOrder
