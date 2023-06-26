@@ -13,12 +13,6 @@ class UserView(APIView):
         serializer.save()
         return Response(serializer.data, status=201)
 
-class LoginView(APIView):
-    def post(self, request: Request) -> Response:
-        serializer = LoginSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=201)
 
 class UserDetailView(APIView):
     authentication_classes = [JWTAuthentication]
