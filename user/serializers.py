@@ -22,7 +22,7 @@ class UserSerializer(serializers.Serializer):
         if validated_data["is_employee"]:
             return User.objects.create_superuser(**validated_data)
         return User.objects.create_user(**validated_data)
-
+    
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150, write_only=True)

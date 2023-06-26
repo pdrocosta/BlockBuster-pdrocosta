@@ -1,18 +1,18 @@
-from django.shortcuts import render
 from rest_framework.views import APIView
 from movies.models import Movie
-from movies.permissions import IsAdminOrReadOnly
 from movies.serializers import MovieSerializer, MovieOrderSerializer
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from movies.permissions import IsAdminOrReadOnly
-
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 
 class MovieView(APIView, PageNumberPagination):
     permission_classes = [IsAdminOrReadOnly]
     authentication_classes = [JWTAuthentication]
+
+    
     def get(self, request):
         movies = Movie.objects.all().order_by("id")
         result_page = self.paginate_queryset(movies, request)
@@ -40,7 +40,7 @@ class MovieDetailView(APIView):
         return Response(status=204)
     
 class MovieOrderView(APIView):
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def post(self, request, movie_id):

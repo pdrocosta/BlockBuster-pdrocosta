@@ -4,7 +4,7 @@ from user.serializers import UserSerializer, LoginSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
 from user.models import User
-from movies.permissions import IsAdminOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 
 class UserView(APIView):
     def post(self, request: Request) -> Response:
@@ -22,7 +22,7 @@ class LoginView(APIView):
 
 class UserDetailView(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminOrReadOnly]
+    permission_classes = [IsAuthenticated]
 
     def get(self, request: Request, user_id: int) -> Response:
         if request.user.is_superuser or request.user.id == user_id:
@@ -34,11 +34,15 @@ class UserDetailView(APIView):
     def patch(self, request: Request, user_id: int) -> Response:
         if request.user.is_superuser or request.user.id == user_id:
             user = get_object_or_404(User, id=user_id)
+            if 'password' in request.data:
+                user.set_password(request.data['password'])
+                user.save()
+
             serializer = UserSerializer(instance=user, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             for key, value in serializer.validated_data.items():
                 setattr(user, key, value)
-            user.save()
+            user.save() 
 
             return Response(data=serializer.data, status=200)
         return Response(status=403)
