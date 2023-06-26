@@ -8,29 +8,29 @@ from movies.models import Movie, MovieOrder
 
 
 class MovieSerializer(serializers.ModelSerializer):
-    added_by = serializers.SerializerMethodField(read_only=True)
-    
+    user = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Movie
-        fields = ['id', 'title', 'duration', 'rating', 'synopsis', 'added_by']
+        fields = ['id', 'title', 'duration', 'rating', 'synopsis', 'user']
 
-
-    def get_added_by(self, obj):
-        return obj.user.email
+    def get_user(self, obj):
+        return obj.user_id
 
     def create(self, validated_data):
         user = self.context['request'].user
         movie = Movie.objects.create(user=user, **validated_data)
         return movie
 
-class MovieOrderSerializer(serializers.Serializer):
-    movie = serializers.IntegerField()
-    user = serializers.IntegerField()
-    buyed_at = serializers.DateTimeField(auto_now_add=True)
-    price = serializers.DecimalField(max_digits=8, decimal_places=2)
-    title =serializers.CharField()
+class MovieOrderSerializer(serializers.ModelSerializer):
+    buyed_by = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
+    class Meta:
+        model = MovieOrder
+        fields = ['movie', 'buyed_by', 'buyed_at', 'price', 'title']
 
     def create(self, validated_data):
         buyed_by = self.context['request'].user
-        movie_order = MovieOrder.objects.create(buyed_by=buyed_by.email, **validated_data)
+        movie_order = MovieOrder.objects.create(buyed_by=buyed_by, **validated_data)
         return movie_order
+

@@ -25,10 +25,5 @@ class UserSerializer(serializers.Serializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=150, write_only=True, message={"username": ["This field is required."]})
-    password = serializers.CharField(max_length=127, write_only=True,  message={"password": ["This field is required."]})
-
-    #def validate_unique_infos(self, value: User):
-    #    email_validation = User.objects.get(self.email)
-    #    user_validation = User.objects.get(self.username)
-    #    return not email_validation ({"email already registered."}) or not user_validation ({"username already taken."}) or ...
+    username = serializers.CharField(max_length=150, write_only=True)
+    password = serializers.CharField(max_length=127, write_only=True)

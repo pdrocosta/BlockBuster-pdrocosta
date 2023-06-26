@@ -1,34 +1,44 @@
 from django.shortcuts import render
-from rest_framework.views import APIView, Request, Response, status
+from rest_framework.views import APIView, Request, Response
 from user.serializers import UserSerializer, LoginSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework_simplejwt.views import TokenObtainPairView
-
-permission_classes=[]
+from django.shortcuts import get_object_or_404
+from user.models import User
+from movies.permissions import IsAdminOrReadOnly
 
 class UserView(APIView):
-
     def post(self, request: Request) -> Response:
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+        return Response(serializer.data, status=201)
 
 class LoginView(APIView):
-    authentication_classes = [JWTAuthentication]
-
     def post(self, request: Request) -> Response:
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=201)
 
-        user = authenticate(**serializer.validated_data)
+class UserDetailView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminOrReadOnly]
 
-        if not user:
-            return Response({"detail": "No active account found with the given credentials"}, status=400)
-        refresh = RefreshToken.for_user(user)
-        token_dict = {"refresh": str(refresh),
-                      "access": str(refresh.access_token)}
-        return Response(token_dict, status=200)
+    def get(self, request: Request, user_id: int) -> Response:
+        if request.user.is_superuser or request.user.id == user_id:
+            user = get_object_or_404(User, id=user_id)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        return Response(status=403)
+
+    def patch(self, request: Request, user_id: int) -> Response:
+        if request.user.is_superuser or request.user.id == user_id:
+            user = get_object_or_404(User, id=user_id)
+            serializer = UserSerializer(instance=user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            for key, value in serializer.validated_data.items():
+                setattr(user, key, value)
+            user.save()
+
+            return Response(data=serializer.data, status=200)
+        return Response(status=403)
